@@ -25,6 +25,7 @@ setup(name='raptus.mailcone.auth',
       install_requires=[
           # -*- Extra requirements: -*-
           'setuptools',
+          'zope.app.security',
 
       ],
       entry_points="""
