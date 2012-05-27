@@ -1,0 +1,9 @@
+<html xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      i18n:domain="raptus.mailcone.auth"
+      tal:omit-tag="">
+
+    <span i18n:translate="">your logged out :-) </span>
+
+</html>
