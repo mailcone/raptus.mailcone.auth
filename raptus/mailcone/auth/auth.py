@@ -7,11 +7,14 @@ from BTrees.OOBTree import OOBTree
 
 from zope.formlib.form import applyData
 from zope.pluggableauth.interfaces import ICredentialsPlugin
+from zope.securitypolicy.interfaces import IPrincipalRoleManager
 from zope.app.authentication.session import SessionCredentialsPlugin
 from zope.pluggableauth.interfaces import IAuthenticatorPlugin, IAuthenticatorPlugin
+from zope.pluggableauth.interfaces import IAuthenticatedPrincipalCreated, IPrincipalsAddedToGroup
 
 from ldapadapter.utility import LDAPAdapter
 from ldappas.interfaces import ILDAPAuthentication
+from ldappas.authentication import PrincipalInfo as LDAPPrincipalInfo
 from ldappas.authentication import LDAPAuthentication as BaseLDAPAuthentication
 
 from raptus.mailcone.app.config import local_configuration
@@ -81,7 +84,7 @@ class LDAPAuthentication(BaseLDAPAuthentication, grok.GlobalUtility):
         self.adapterName = 'mailcone-authentication-ldap'
 
     def authenticateCredentials(self, credentials):
-       return self.use_cache(credentials, 'authenticateCredentials')
+        return self.use_cache(credentials, 'authenticateCredentials')
 
     def principalInfo(self, id):
        return self.use_cache(id, 'principalInfo')
@@ -93,7 +96,7 @@ class LDAPAuthentication(BaseLDAPAuthentication, grok.GlobalUtility):
         compare = datetime.datetime.now() - delta
         for principal, time in self.cache.values():
             if time < compare:
-                del self.cache[key]
+                del self.cache[attr]
         
         if attr in self.cache:
             principal, time = self.cache[attr]
@@ -106,5 +109,10 @@ class LDAPAuthentication(BaseLDAPAuthentication, grok.GlobalUtility):
 
 
 
+@grok.subscribe(IAuthenticatedPrincipalCreated)
+def ldap_assing_role_to_manager(event):
+    if isinstance(event.principal, LDAPPrincipalInfo):
+        manager = IPrincipalRoleManager(grok.getSite())
+        manager.assignRoleToPrincipal('mailcone.ldap.authentication', event.principal.id)
 
 

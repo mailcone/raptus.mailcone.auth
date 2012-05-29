@@ -10,6 +10,7 @@ from raptus.mailcone.auth import _
 class ILoginForm(interface.Interface):
     login = schema.BytesLine(title=_('Username'), required=True)
     password = schema.Password(title=_('Password'), required=True)
+    camefrom = schema.BytesLine(required=False)
 
 
 

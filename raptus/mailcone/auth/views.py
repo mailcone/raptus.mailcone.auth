@@ -23,10 +23,16 @@ class Login(FormPage):
     label = _('Login')
     prefix = 'loginform'
     form_fields = grok.Fields(interfaces.ILoginForm)
+    
+    def setUpWidgets(self, ignore_request=False):
+        super(Login, self).setUpWidgets(ignore_request)
+        self.widgets['camefrom'].type = 'hidden'
+        if 'camefrom' in self.request.form:
+            self.widgets['camefrom']._data = self.request.form['camefrom']
 
     @grok.action(_(u'Login'), name='login')
     def handle_login(self, **data):
-        return ''
+        self.redirect(data.get('camefrom', ''))
 
 class Logout(Page):
     grok.context(interface.Interface)
