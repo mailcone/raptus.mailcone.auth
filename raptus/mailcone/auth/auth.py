@@ -3,7 +3,7 @@ import grok
 import datetime
 import ConfigParser
 
-from BTrees.OOBTree import OOBTree
+from BTrees.LOBTree import LOBTree
 
 from zope.formlib.form import applyData
 from zope.pluggableauth.interfaces import ICredentialsPlugin
@@ -66,7 +66,7 @@ class LDAPAuthentication(BaseLDAPAuthentication, grok.GlobalUtility):
     grok.provides(IAuthenticatorPlugin)
     grok.name('ldap-authenticator')
     
-    cache = OOBTree()
+    cache = LOBTree()
 
     def __init__(self):
         super(LDAPAuthentication, self).__init__()
@@ -92,19 +92,24 @@ class LDAPAuthentication(BaseLDAPAuthentication, grok.GlobalUtility):
     def use_cache(self, attr, func):
         """ allow caching for predefined time "cache_expire".
         """
+        if isinstance(attr, dict):
+            attr_key = hash(tuple(attr.iteritems()))
+        else:
+            attr_key = hash(attr)
         delta = datetime.timedelta(seconds=int(self._config.get('cache_expire')))
         compare = datetime.datetime.now() - delta
-        for principal, time in self.cache.values():
+        for key, value in self.cache.iteritems():
+            principal, time = value
             if time < compare:
-                del self.cache[attr]
+                del self.cache[key]
         
-        if attr in self.cache:
-            principal, time = self.cache[attr]
-            self.cache[attr] = (principal, datetime.datetime.now(),)
+        if attr_key in self.cache:
+            principal, time = self.cache[attr_key]
+            self.cache[attr_key] = (principal, datetime.datetime.now(),)
             return principal
         principal = getattr(super(LDAPAuthentication, self), func)(attr)
         if principal is not None:
-            self.cache[attr] = (principal, datetime.datetime.now(),)
+            self.cache[attr_key] = (principal, datetime.datetime.now(),)
         return principal
 
 
