@@ -111,7 +111,7 @@ class LDAPAuthentication(BaseLDAPAuthentication, grok.GlobalUtility):
 
 @grok.subscribe(IAuthenticatedPrincipalCreated)
 def ldap_assing_role_to_manager(event):
-    if isinstance(event.principal, LDAPPrincipalInfo):
+    if isinstance(event.info, LDAPPrincipalInfo):
         manager = IPrincipalRoleManager(grok.getSite())
         manager.assignRoleToPrincipal('mailcone.ldap.authentication', event.principal.id)
 

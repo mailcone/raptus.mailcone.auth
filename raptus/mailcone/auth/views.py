@@ -1,4 +1,5 @@
 import grok
+from grokcore import message
 from megrok import navigation
 
 from zope import interface
@@ -32,7 +33,16 @@ class Login(FormPage):
 
     @grok.action(_(u'Login'), name='login')
     def handle_login(self, **data):
-        self.redirect(data.get('camefrom', ''))
+        if component.getUtility(IAuthentication).authenticate(self.request) is None:
+            message.send(_('Wrong Login or Password'))
+        else:
+            message.send(_('Login successful'))
+            if data.get('camefrom', None):
+                self.redirect(data.get('camefrom', ''))
+            else:
+                self.redirect(self.url(grok.getSite()))
+
+
 
 class Logout(Page):
     grok.context(interface.Interface)
